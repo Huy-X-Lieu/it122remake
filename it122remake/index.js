@@ -35,7 +35,7 @@ app.get("/detail", (req, res, next) => {
   const search_term = new RegExp(req.query.name.replace("%20", " "), "i");
   Cosmetic.findOne({ name: search_term })
     .lean()
-      .then((product) => {
+    .then((product) => {
           res.render("detail", { product: JSON.stringify(product) });
     })
     .catch((err) => next(err));
@@ -90,13 +90,13 @@ app.post("/api/products/add", (req, res, next) => {
 });
 
 app.delete("/api/products/delete/:id", (req, res, next) => {
-  const id = req.params.id;
-  const product = Cosmetic.findByIdAndDelete(id);
-  if (!product) {
-    res.status(404).send("Product not found");
-  } else {
-    res.status(204).send("Product deleted");
-  }
+    const id = req.params.id;
+    const product = Cosmetic.findByIdAndDelete(id);
+    if (!product) {
+        res.status(404).send("Product not found");
+    } else {
+        res.status(204).send("Product deleted");
+    }
 });
 
 //-------------end of REST API --------------------------------------------
