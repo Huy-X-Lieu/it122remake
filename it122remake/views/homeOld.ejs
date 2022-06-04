@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+  </head>
+  <body>
+    <% if (products) { %>
+    <ul>
+      <% products.forEach(function(item){%>
+      <li class="card">
+        <p class="name"><%= item.name%></p>
+        <p class="type"><%= item.type%></p>
+        <p class="price"><%= item.price%></p>
+        <a href="<%= encodeURI(`http://localhost:3000/detail?name=${item.name.toLowerCase()}`)%>">View detail</a>
+      </li>
+      <% });%>
+    </ul>
+    <% } %>
+  </body>
+</html>
