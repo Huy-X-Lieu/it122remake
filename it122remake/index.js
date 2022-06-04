@@ -17,6 +17,24 @@ app.use(express.urlencoded());
 app.use(express.json());
 app.use("/api", cors());
 
+/*
+ * Old server side rendering code
+  app.get("/", (req, res) => {
+    res.render("home", {
+    });
+});
+
+app.get("/detail", (req, res) => {
+    const product = getProductFromQuery(req.url);
+
+    if (product) {
+        res.render("detail", { product });
+    } else {
+        res.render("detail", { error: "product not found" });
+    }
+});
+ */
+
 //------------------Server side rendering------------------------------
 app.get("/", (req, res, next) => {
   const fields = "name type brand price";
