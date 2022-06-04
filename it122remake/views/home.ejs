@@ -15,13 +15,12 @@
     <div id="root"></div>
   </body>
 <script type="text/babel">
-    const data = (<%- products %>);
-	
-    const productStyle = {
+
+const productStyle = {
         cursor: 'pointer'
     }
 
-	const Products = (props) =>{
+const Products = (props) =>{
 	    return <ul>
 		    {props.products.map(product =>
                 <li style={productStyle} 
@@ -35,8 +34,26 @@
     const productClickHandler = (event) =>{
         window.location.href = "/detail?name=" + event.target.innerText;
     }
+
+class ProductApp extends React.Component{
+    constructor(props){
+        super(props);
+		this.state = {data: <%- products %>};
+    }
 	
-    ReactDOM.render(<Products products={data} clickHandler={productClickHandler}/>,
-    document.getElementById("root"));
+	render(){
+        return(
+            <Products products={this.state.data} clickHandler={productClickHandler} />
+        )
+    }
+}
+
+
+	
+	
+ReactDOM.render(<ProductApp />, document.getElementById("root"));
+	
+    //ReactDOM.render(<Products products={data} clickHandler={productClickHandler}/>,
+    //document.getElementById("root"));
 </script>
 </html>

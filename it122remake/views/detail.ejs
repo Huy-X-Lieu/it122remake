@@ -15,19 +15,19 @@
       <div id ="root"></div>
   </body>
 <script type="text/babel">
-const product = <%- product %>
+const product = <%- product %>;
 
 const Product = ({product}) => {
   return <div>
-	<h1>{product.name}</h1>
-	<h3>{product.promote}</h3>
-	<p>price: {product.price}</p>
-	<p>type: {product.type}</p>
-	<p>brand: {product.brand}</p>
-	<p>volume: {product.volume}ML</p>
-	<p>rating: {product.ratingAverage}/5 ({product.ratingAmount})</p>
-	<a href="/"> Back to Home Page</a>
-      </div>
+            <h1>{product.name}</h1>
+            <h3>{product.promote}</h3>
+            <p>price: {product.price}</p>
+            <p>type: {product.type}</p>
+            <p>brand: {product.brand}</p>
+            <p>volume: {product.volume}ML</p>
+            <p>rating: {product.ratingAverage}/5 ({product.ratingAmount})</p>
+            <a href="/"> Back to Home Page</a>
+        </div>
 }
 
 ReactDOM.render(
