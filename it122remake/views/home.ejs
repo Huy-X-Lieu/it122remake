@@ -20,6 +20,10 @@ const productStyle = {
         cursor: 'pointer'
     }
 
+const selectedProduct = {
+backgroundColor: '#e6e6e6'
+}
+
 const Products = (props) =>{
 	    return <ul>
 		    {props.products.map(product =>
@@ -31,9 +35,7 @@ const Products = (props) =>{
     </ul>
     }
 	
-    const productClickHandler = (event) =>{
-        window.location.href = "/detail?name=" + event.target.innerText;
-    }
+
 
 class ProductApp extends React.Component{
     constructor(props){
@@ -52,6 +54,10 @@ class ProductApp extends React.Component{
 	
 	
 ReactDOM.render(<ProductApp />, document.getElementById("root"));
+	
+	//    const productClickHandler = (event) =>{
+    //    window.location.href = "/detail?name=" + event.target.innerText;
+    //}
 	
     //ReactDOM.render(<Products products={data} clickHandler={productClickHandler}/>,
     //document.getElementById("root"));
