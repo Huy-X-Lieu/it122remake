@@ -15,42 +15,104 @@
     <div id="root"></div>
   </body>
 <script type="text/babel">
+const { Component } = React;
+const { render } = ReactDOM;
+const { useState } = React;
 
 const productStyle = {
-        cursor: 'pointer'
-    }
+    cursor: 'pointer'
+}
 
 const selectedProduct = {
-backgroundColor: '#e6e6e6'
+    backgroundColor: '#e6e6e6'
 }
 
-const Products = (props) =>{
-	    return <ul>
-		    {props.products.map(product =>
-                <li style={productStyle} 
-                    key={product._id}
-                    onClick={props.clickHandler}>
-                        {product.name}
-                </li>)}
-    </ul>
-    }
+const ProductApp = () =>{
+    const data = <%- products %>;
+    const [selectedProduct, setSelectedProduct] = useState("");
 	
-    const productClickHandler = (event) =>{
-        window.location.href = "/detail?name=" + event.target.innerText;
+	const productClickHandler = (product) => {
+		setSelectedProduct(product);
+	}
+	
+    return(
+    <div>
+        <ProductList products={data} selectedItem={selectedProduct} clickHandler={productClickHandler} />
+		<ProductDetail product={selectedProduct} clearingButtonClickHandler={productClickHandler} />
+    </div>
+    );
+}
+
+const ProductList = (props) =>{
+    const productClickHandler = (product) => {
+        props.clickHandler(product);
+    }
+    return (
+        <ul>
+            {props.products.map(product => {
+                return (
+                <li style={product._id === props.selectedItem._id ? selectedProduct : productStyle} 
+                    key={product._id}
+                    onClick={() =>productClickHandler(product)} >
+                        {product.name}
+                </li>
+                );
+            })}
+        </ul>
+    )}
+	
+
+
+const ProductDetail = (props) => {
+    const buttonClickHandler = () => {
+        props.clearingButtonClickHandler("");
     }
 
-class ProductApp extends React.Component{
-    constructor(props){
-        super(props);
-		this.state = {data: <%- products %>};
-    }
-	
-	render(){
-        return(
-            <Products products={this.state.data} clickHandler={productClickHandler} />
+    if(!props.product){
+        return (
+            <div>
+                <h4>Detail:</h4>
+            </div>
         )
     }
+
+
+    return (
+        <div className="product-detail__container">
+            <h4>Detail:</h4>
+            <h3>{props.product.name}</h3>
+            <h4>promo: {props.product.promote}</h4>
+            <h4>type: {props.product.type}</h4>
+            <h4>brand: {props.product.brand}</h4>
+            <h4>price: ${props.product.price}</h4>
+            <h4>volume: {props.product.volume}ML</h4>
+            <h4>rating: {props.product.ratingAverage}/5 ({props.product.ratingAmount})</h4>
+            <ul>
+                <h4>description:</h4>
+                {
+                    props.product.description.map((des, index) => <li key={index}>{des}</li>)}
+            </ul>
+            <ul>
+                <h4>effect:</h4>
+            {props.product.effect.map((eff, index) => <li key={index}>{eff}</li>)}
+            </ul>
+            <ul>
+                <h4>usage:</h4>
+            {props.product.usage.map((usage, index) => <li key={index}>{usage}</li>)}
+            </ul>
+            <ul>
+                <h4>skin types:</h4>
+            {props.product.skinType.map((skin, index) => <li key={index}>{skin}</li>)}
+            </ul>
+            <ul>
+                <h4>skin concern:</h4>
+            {props.product.skinConcern.map((skin, index) => <li key={index}>{skin}</li>)}
+            </ul>
+            <button onClick={buttonClickHandler}>Clear</button>
+        </div>
+	)
 }
+
 
 
 	

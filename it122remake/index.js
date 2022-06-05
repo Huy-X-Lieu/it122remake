@@ -37,9 +37,7 @@ app.get("/detail", (req, res) => {
 
 //------------------Server side rendering------------------------------
 app.get("/", (req, res, next) => {
-  const fields = "name type brand price";
   Cosmetic.find({})
-    .select(fields)
     .lean()
     .then((products) => {
       res.render("home", {
