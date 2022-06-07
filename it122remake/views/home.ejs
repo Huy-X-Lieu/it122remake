@@ -15,10 +15,8 @@
     <div id="root"></div>
   </body>
 <script type="text/babel">
-const { Component } = React;
+const { Component, useState, useEffect } = React;
 const { render } = ReactDOM;
-const { useState } = React;
-
 const productStyle = {
     cursor: 'pointer'
 }
@@ -28,25 +26,80 @@ const selectedProduct = {
 }
 
 const ProductApp = () =>{
-    const data = <%- products %>;
+    const [productList, setProductList] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState("");
+    const [editedProduct, setEditedProduct] = useState("");
+    const [deletedProduct, setDeletedProduct] = useState("");
+    
+
+    const loadData = () => {
+        fetch('/api/products').then((response) => {
+                return response.json();
+            }).then((data) => {
+                setProductList(data.products);
+            });
+    };
+
+    const deleteData = (product) =>{
+        fetch(`/api/products/delete/${product._id}`,{
+            method: 'DELETE'
+        }).then((response) => {
+            setDeletedProduct({});
+            setSelectedProduct("");
+        });
+    };
+
+    const updateData = (product) =>{
+        console.log("updating product...");
+        fetch(`/api/products/update/${product._id}`,{
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(product)
+        }).then((response) => {
+            return response.json();
+        }).then((data) => {
+            console.log(data);
+            setEditedProduct({});
+            setSelectedProduct("");
+        });
+    }
+
+    useEffect(() => {
+        loadData();
+    }, [editedProduct, deletedProduct]);
+
+    
 	
 	const productClickHandler = (product) => {
 		setSelectedProduct(product);
 	}
-	
+
+
     return(
     <div>
-        <ProductList products={data} selectedItem={selectedProduct} clickHandler={productClickHandler} />
-		<ProductDetail product={selectedProduct} clearingButtonClickHandler={productClickHandler} />
+        <Products products={productList} selectedItem={selectedProduct} clickHandler={productClickHandler} />
+		<ProductDetailForm product={selectedProduct}
+                            updateHandler={updateData}
+                            deleteHandler={deleteData}
+                         clearFormButtonClickHandler={productClickHandler} />
     </div>
     );
+
 }
 
-const ProductList = (props) =>{
+const Products = (props) =>{
     const productClickHandler = (product) => {
         props.clickHandler(product);
     }
+
+    if(props.products.length === 0){
+        return(
+            <div>Loading...</div>
+        );
+    }
+    else{
     return (
         <ul>
             {props.products.map(product => {
@@ -59,13 +112,33 @@ const ProductList = (props) =>{
                 );
             })}
         </ul>
-    )}
+    )}}
 	
 
 
-const ProductDetail = (props) => {
-    const buttonClickHandler = () => {
-        props.clearingButtonClickHandler("");
+const ProductDetailForm = (props) => {
+    const [productDetail, setProductDetail] = useState({});
+
+    const loadProductDetail = () => {
+        setProductDetail(props.product);
+    }
+    useEffect(() => {
+        if(props.product._id){
+            loadProductDetail();            
+        }
+    },[props.product]);
+
+
+    const clearButtonClickHandler = () => {
+        setProductDetail({});
+        props.clearFormButtonClickHandler("");
+    }
+    const updateButtonClickHandler = (event) => {
+        event.preventDefault();
+        props.updateHandler(productDetail);
+    }
+    const deleteButtonClickHandler = () => {
+        props.deleteHandler(productDetail);
     }
 
     if(!props.product){
@@ -77,40 +150,156 @@ const ProductDetail = (props) => {
     }
 
 
-    return (
-        <div className="product-detail__container">
-            <h4>Detail:</h4>
-            <h3>{props.product.name}</h3>
-            <h4>promo: {props.product.promote}</h4>
-            <h4>type: {props.product.type}</h4>
-            <h4>brand: {props.product.brand}</h4>
-            <h4>price: ${props.product.price}</h4>
-            <h4>volume: {props.product.volume}ML</h4>
-            <h4>rating: {props.product.ratingAverage}/5 ({props.product.ratingAmount})</h4>
-            <ul>
-                <h4>description:</h4>
-                {
-                    props.product.description.map((des, index) => <li key={index}>{des}</li>)}
-            </ul>
-            <ul>
-                <h4>effect:</h4>
-            {props.product.effect.map((eff, index) => <li key={index}>{eff}</li>)}
-            </ul>
-            <ul>
-                <h4>usage:</h4>
-            {props.product.usage.map((usage, index) => <li key={index}>{usage}</li>)}
-            </ul>
-            <ul>
-                <h4>skin types:</h4>
-            {props.product.skinType.map((skin, index) => <li key={index}>{skin}</li>)}
-            </ul>
-            <ul>
-                <h4>skin concern:</h4>
-            {props.product.skinConcern.map((skin, index) => <li key={index}>{skin}</li>)}
-            </ul>
-            <button onClick={buttonClickHandler}>Clear</button>
-        </div>
-	)
+    return(
+        <form onSubmit={updateButtonClickHandler}>
+            <div>
+                <label>Name:</label><br/>
+                <input name="name" type="text" value={productDetail.name} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, name: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Promo:</label><br/>
+                <textarea name="promo" rows="10" cols="100" value={productDetail.promote} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, promote: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Type:</label><br/>
+                <input type="text" value={productDetail.type} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, type: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Brand:</label><br/>
+                <input type="text" value={productDetail.brand} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, brand: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Price:</label><br/>
+                <input type="number" min="0.01" step="0.01" value={productDetail.price} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, price: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Volume (ML) :</label><br/>
+                <input type="number" min="1" step="1" value={productDetail.volume} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, volume: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Rating:</label><br/>
+                <input type="number" min="0" max="5" step="0.1" value={productDetail.ratingAverage} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, ratingAverage: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Rating Amount:</label><br/>
+                <input type="number" min="0" step="1" value={productDetail.ratingAmount} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, ratingAmount: event.target.value});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Description:</label><br/>
+                <textarea rows="10" cols="100" value={productDetail.description} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, description: event.target.value.split("\n").map(line => {
+                        return line.trim();
+                    })});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Effect:</label><br/>
+                <textarea rows="10" cols="100" value={productDetail.effect} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, effect: event.target.value.split("\n").map(line => {
+                        return line.trim();
+                    })});
+                    }
+                } />
+            </div>
+            
+            <div>
+                <label>Skin Type:</label><br/>
+                <textarea rows="10" cols="100" value={productDetail.skinType} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, skinType: event.target.value.split("\n").map(line => {
+                            return line.trim();
+                    })});
+                    }
+                } />
+            </div>
+            <div>
+                <label>Skin Concern:</label><br/>
+                <textarea rows="10" cols="100" value={productDetail.skinConcern} onChange={
+                    (event) => {
+                        setProductDetail({...productDetail, skinConcern: event.target.value.split("\n").map(line => {
+                            return line.trim();
+                    })});
+                    }
+                } />
+            </div>
+            <div>
+                <button type="button" onClick={clearButtonClickHandler}>Clear</button>
+                <button type="submit" >Update</button>
+                <button type="button" onClick={deleteButtonClickHandler}>Delete</button>
+            </div>
+            </form>
+    )
+
+
+    // return (
+    //     <div className="product-detail__container">
+    //         <h4>Detail:</h4>
+    //         <h3>{props.product.name}</h3>
+    //         <h4>promo: {props.product.promote}</h4>
+    //         <h4>type: {props.product.type}</h4>
+    //         <h4>brand: {props.product.brand}</h4>
+    //         <h4>price: ${props.product.price}</h4>
+    //         <h4>volume: {props.product.volume}ML</h4>
+    //         <h4>rating: {props.product.ratingAverage}/5 ({props.product.ratingAmount})</h4>
+    //         <ul>
+    //             <h4>description:</h4>
+    //             {
+    //                 props.product.description.map((des, index) => <li key={index}>{des}</li>)}
+    //         </ul>
+    //         <ul>
+    //             <h4>effect:</h4>
+    //         {props.product.effect.map((eff, index) => <li key={index}>{eff}</li>)}
+    //         </ul>
+    //         <ul>
+    //             <h4>usage:</h4>
+    //         {props.product.usage.map((usage, index) => <li key={index}>{usage}</li>)}
+    //         </ul>
+    //         <ul>
+    //             <h4>skin types:</h4>
+    //         {props.product.skinType.map((skin, index) => <li key={index}>{skin}</li>)}
+    //         </ul>
+    //         <ul>
+    //             <h4>skin concern:</h4>
+    //         {props.product.skinConcern.map((skin, index) => <li key={index}>{skin}</li>)}
+    //         </ul>
+    //         <button onClick={clearButtonClickHandler}>Clear</button>
+    //     </div>
+	// )
 }
 
 
